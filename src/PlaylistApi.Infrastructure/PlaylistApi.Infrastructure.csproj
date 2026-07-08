@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlaylistApi.Application\PlaylistApi.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Version current as of mid-2026; run `dotnet restore` and it will
+         pull this exact version. If NuGet complains it's been yanked,
+         bump the version number here to whatever `dotnet add package
+         Microsoft.EntityFrameworkCore.Sqlite` resolves to. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
