@@ -55,6 +55,31 @@ public class PlaylistsController : ControllerBase
         return Ok(playlists);
     }
 
+    // PUT /api/playlists/{id}
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<PlaylistDto>> UpdatePlaylist(Guid id, [FromBody] UpdatePlaylistDto dto)
+    {
+        try
+        {
+            var playlist = await _service.UpdatePlaylistAsync(id, dto);
+            return playlist is null ? NotFound(new { error = $"Playlist {id} not found." }) : Ok(playlist);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    // DELETE /api/playlists/{id}
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeletePlaylist(Guid id)
+    {
+        var deleted = await _service.DeletePlaylistAsync(id);
+        // 204 No Content is the conventional REST response for a
+        // successful DELETE - there's no body to return.
+        return deleted ? NoContent() : NotFound(new { error = $"Playlist {id} not found." });
+    }
+
     // POST /api/playlists/{id}/songs
     [HttpPost("{id:guid}/songs")]
     public async Task<ActionResult<PlaylistDto>> AddSong(Guid id, [FromBody] AddSongDto dto)
@@ -68,5 +93,32 @@ public class PlaylistsController : ControllerBase
         {
             return BadRequest(new { error = ex.Message });
         }
+    }
+
+    // PUT /api/playlists/{id}/songs/{songId}
+    [HttpPut("{id:guid}/songs/{songId:guid}")]
+    public async Task<ActionResult<PlaylistDto>> UpdateSong(Guid id, Guid songId, [FromBody] UpdateSongDto dto)
+    {
+        try
+        {
+            var playlist = await _service.UpdateSongAsync(id, songId, dto);
+            return playlist is null
+                ? NotFound(new { error = $"Song {songId} not found in playlist {id}." })
+                : Ok(playlist);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    // DELETE /api/playlists/{id}/songs/{songId}
+    [HttpDelete("{id:guid}/songs/{songId:guid}")]
+    public async Task<ActionResult<PlaylistDto>> DeleteSong(Guid id, Guid songId)
+    {
+        var playlist = await _service.DeleteSongAsync(id, songId);
+        return playlist is null
+            ? NotFound(new { error = $"Song {songId} not found in playlist {id}." })
+            : Ok(playlist);
     }
 }

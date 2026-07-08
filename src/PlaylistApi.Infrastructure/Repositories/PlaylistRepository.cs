@@ -40,9 +40,24 @@ public class PlaylistRepository : IPlaylistRepository
             .ToListAsync();
     }
 
+    public void RemovePlaylist(Playlist playlist)
+    {
+        _context.Playlists.Remove(playlist);
+    }
+
     public async Task AddSongAsync(Song song)
     {
         await _context.Songs.AddAsync(song);
+    }
+
+    public async Task<Song?> GetSongByIdAsync(Guid songId)
+    {
+        return await _context.Songs.FirstOrDefaultAsync(s => s.Id == songId);
+    }
+
+    public void RemoveSong(Song song)
+    {
+        _context.Songs.Remove(song);
     }
 
     public async Task SaveChangesAsync()

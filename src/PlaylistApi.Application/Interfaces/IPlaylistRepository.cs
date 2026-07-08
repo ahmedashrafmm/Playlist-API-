@@ -11,6 +11,11 @@ public interface IPlaylistRepository
     Task AddPlaylistAsync(Playlist playlist);
     Task<Playlist?> GetByIdAsync(Guid id);
     Task<List<Playlist>> GetByUserIdAsync(string userId);
+    void RemovePlaylist(Playlist playlist);
+
     Task AddSongAsync(Song song);
+    Task<Song?> GetSongByIdAsync(Guid songId);
+    void RemoveSong(Song song);
+
     Task SaveChangesAsync();
 }
