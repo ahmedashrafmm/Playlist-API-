@@ -75,6 +75,54 @@ public class PlaylistsControllerTests : IClassFixture<PlaylistApiFactory>
     }
 
     [Fact]
+    public async Task UpdatePlaylist_ChangesTheName()
+    {
+        var createResponse = await _client.PostAsJsonAsync(
+            "/api/playlists", new CreatePlaylistDto("Original Name", "test-user"));
+        var playlist = await createResponse.Content.ReadFromJsonAsync<PlaylistDto>();
+
+        var updateResponse = await _client.PutAsJsonAsync(
+            $"/api/playlists/{playlist!.Id}", new UpdatePlaylistDto("Renamed"));
+
+        updateResponse.EnsureSuccessStatusCode();
+        var updated = await updateResponse.Content.ReadFromJsonAsync<PlaylistDto>();
+        Assert.Equal("Renamed", updated!.Name);
+    }
+
+    [Fact]
+    public async Task DeletePlaylist_ThenGetById_Returns404()
+    {
+        var createResponse = await _client.PostAsJsonAsync(
+            "/api/playlists", new CreatePlaylistDto("To Be Deleted", "test-user"));
+        var playlist = await createResponse.Content.ReadFromJsonAsync<PlaylistDto>();
+
+        var deleteResponse = await _client.DeleteAsync($"/api/playlists/{playlist!.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        var getResponse = await _client.GetAsync($"/api/playlists/{playlist.Id}");
+        Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteSong_RemovesItFromThePlaylist()
+    {
+        var createResponse = await _client.PostAsJsonAsync(
+            "/api/playlists", new CreatePlaylistDto("Playlist With Song", "test-user"));
+        var playlist = await createResponse.Content.ReadFromJsonAsync<PlaylistDto>();
+
+        var addSongResponse = await _client.PostAsJsonAsync(
+            $"/api/playlists/{playlist!.Id}/songs", new AddSongDto("Doomed Song", "Artist", 100));
+        var withSong = await addSongResponse.Content.ReadFromJsonAsync<PlaylistDto>();
+        var songId = withSong!.Songs[0].Id;
+
+        var deleteResponse = await _client.DeleteAsync($"/api/playlists/{playlist.Id}/songs/{songId}");
+        deleteResponse.EnsureSuccessStatusCode();
+
+        var afterDelete = await deleteResponse.Content.ReadFromJsonAsync<PlaylistDto>();
+        Assert.Empty(afterDelete!.Songs);
+    }
+
+    [Fact]
     public async Task GetPlaylists_FilteredByUserId_OnlyReturnsThatUsersPlaylists()
     {
         await _client.PostAsJsonAsync("/api/playlists", new CreatePlaylistDto("User A Playlist", "user-a"));

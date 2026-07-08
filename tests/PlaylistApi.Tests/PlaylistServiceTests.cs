@@ -114,4 +114,65 @@ public class PlaylistServiceTests
         await Assert.ThrowsAsync<ArgumentException>(() =>
             _sut.AddSongToPlaylistAsync(existingPlaylist.Id, new AddSongDto("", "Artist", null)));
     }
+
+    [Fact]
+    public async Task UpdatePlaylistAsync_WhenPlaylistExists_RenamesIt()
+    {
+        var playlist = new Playlist { Name = "Old Name", UserId = "user-123" };
+        _repositoryMock.Setup(r => r.GetByIdAsync(playlist.Id)).ReturnsAsync(playlist);
+
+        var result = await _sut.UpdatePlaylistAsync(playlist.Id, new UpdatePlaylistDto("New Name"));
+
+        Assert.Equal("New Name", result!.Name);
+        _repositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdatePlaylistAsync_WhenPlaylistDoesNotExist_ReturnsNull()
+    {
+        _repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Playlist?)null);
+
+        var result = await _sut.UpdatePlaylistAsync(Guid.NewGuid(), new UpdatePlaylistDto("New Name"));
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task DeletePlaylistAsync_WhenPlaylistExists_ReturnsTrueAndRemovesIt()
+    {
+        var playlist = new Playlist { Name = "To Delete", UserId = "user-123" };
+        _repositoryMock.Setup(r => r.GetByIdAsync(playlist.Id)).ReturnsAsync(playlist);
+
+        var result = await _sut.DeletePlaylistAsync(playlist.Id);
+
+        Assert.True(result);
+        _repositoryMock.Verify(r => r.RemovePlaylist(playlist), Times.Once);
+        _repositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeletePlaylistAsync_WhenPlaylistDoesNotExist_ReturnsFalse()
+    {
+        _repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Playlist?)null);
+
+        var result = await _sut.DeletePlaylistAsync(Guid.NewGuid());
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task DeleteSongAsync_WithSongFromADifferentPlaylist_ReturnsNull()
+    {
+        // Regression test for the ownership-check bug class: a songId
+        // that's valid but belongs to a DIFFERENT playlist than the one
+        // in the URL must not be deletable.
+        var playlist = new Playlist { Name = "Playlist A", UserId = "user-123" };
+        _repositoryMock.Setup(r => r.GetByIdAsync(playlist.Id)).ReturnsAsync(playlist);
+
+        var songFromAnotherPlaylist = Guid.NewGuid();
+        var result = await _sut.DeleteSongAsync(playlist.Id, songFromAnotherPlaylist);
+
+        Assert.Null(result);
+        _repositoryMock.Verify(r => r.RemoveSong(It.IsAny<Song>()), Times.Never);
+    }
 }
