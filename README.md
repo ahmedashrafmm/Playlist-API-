@@ -129,7 +129,16 @@ CreatedAt    DATETIME              DurationSeconds    INTEGER, nullable
 | POST | `/api/playlists` | Create a playlist. Body: `{ "name": "...", "userId": "..." }` |
 | GET | `/api/playlists/{id}` | Get a single playlist (with its songs) by id |
 | GET | `/api/playlists?userId=abc` | Get all playlists for a user |
+| PUT | `/api/playlists/{id}` | Rename a playlist. Body: `{ "name": "..." }` |
+| DELETE | `/api/playlists/{id}` | Delete a playlist (cascades to its songs). Returns `204 No Content` |
 | POST | `/api/playlists/{id}/songs` | Add a song to a playlist. Body: `{ "title": "...", "artist": "...", "durationSeconds": 210 }` |
+| PUT | `/api/playlists/{id}/songs/{songId}` | Update a song's details |
+| DELETE | `/api/playlists/{id}/songs/{songId}` | Remove a song from a playlist. Returns the updated playlist |
+
+Note the asymmetry: deleting a *playlist* returns `204 No Content` (nothing
+meaningful left to return), while deleting a *song* returns the *updated
+playlist* with `200 OK` — the client typically wants to see the remaining
+song list immediately without a follow-up GET.
 
 ## How to run this locally
 
