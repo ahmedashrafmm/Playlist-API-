@@ -104,7 +104,19 @@ public class PlaylistService : IPlaylistService
         await _repository.AddSongAsync(song);
         await _repository.SaveChangesAsync();
 
-        playlist.Songs.Add(song);
+        // With a real EF Core repository, the DbContext's change tracker
+        // already performed "relationship fixup" during AddSongAsync -
+        // it silently added this exact `song` object into `playlist.Songs`
+        // because both are tracked by the same context. With a MOCKED
+        // repository (as in our unit tests), no such tracker exists, so
+        // nothing added it. The Contains() check makes this correct
+        // either way: skip if fixup already did it, add if it didn't.
+        // Contains() uses reference equality here since Song has no
+        // overridden Equals, which is exactly what we want - it's
+        // checking "is this exact object already in the list."
+        if (!playlist.Songs.Contains(song))
+            playlist.Songs.Add(song);
+
         return ToDto(playlist);
     }
 
