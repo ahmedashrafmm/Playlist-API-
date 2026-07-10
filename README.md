@@ -152,7 +152,7 @@ cd PlaylistApi
 dotnet restore
 
 # 3. Run the API (the database and schema are created automatically on first run)
-dotnet run
+dotnet run --project src/PlaylistApi.Api
 ```
 
 
