@@ -151,18 +151,10 @@ cd PlaylistApi
 # 2. Restore NuGet packages
 dotnet restore
 
-# 3. Apply EF Core migrations to create the SQLite database
-#    (Program.cs also does this automatically on first run, but doing
-#    it explicitly is what you'd say out loud if asked "how do I set
-#    up the DB".)
-dotnet tool install --global dotnet-ef   # if you don't already have it
-cd src/PlaylistApi.Api
-dotnet ef migrations add InitialCreate --project ../PlaylistApi.Infrastructure --startup-project .
-dotnet ef database update --project ../PlaylistApi.Infrastructure --startup-project .
-
-# 4. Run the API
+# 3. Run the API (the database and schema are created automatically on first run)
 dotnet run
 ```
+
 
 The API will start at `http://localhost:5080` and open Swagger UI at
 `http://localhost:5080/swagger`, where you can try every endpoint
@@ -177,13 +169,11 @@ dotnet test
 
 ## AI usage disclosure
 
-This project was built with Claude (Anthropic) as a step-by-step
-pairing partner. [Add: a link/export of the chat transcript, per the
-test's requirement to provide full AI chat context.] The approach: I
-directed the architecture decisions (stack, database, layering) and
-Claude generated code file-by-file with inline reasoning, which I
-reviewed, understood, and can defend line-by-line, including the
-tradeoffs noted above.
-
 This project was built with Claude (Anthropic) as a step-by-step pairing
-partner. Full conversation: https://claude.ai/share/04c318da-6a08-459f-9cc1-ee1a6c9d7572
+partner. I directed the architecture decisions (stack, database, layering)
+and Claude generated code file-by-file with inline reasoning, which I
+reviewed, understood, and can defend line-by-line, including the tradeoffs
+noted above — including diagnosing and fixing a real bug where the database
+tables weren't being created on a fresh clone.
+
+Full conversation: https://claude.ai/share/04c318da-6a08-459f-9cc1-ee1a6c9d7572
