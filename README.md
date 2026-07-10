@@ -184,3 +184,6 @@ directed the architecture decisions (stack, database, layering) and
 Claude generated code file-by-file with inline reasoning, which I
 reviewed, understood, and can defend line-by-line, including the
 tradeoffs noted above.
+
+This project was built with Claude (Anthropic) as a step-by-step pairing
+partner. Full conversation: https://claude.ai/share/04c318da-6a08-459f-9cc1-ee1a6c9d7572
